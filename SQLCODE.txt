@@ -1,0 +1,108 @@
+CREATE TABLE Users (
+    UserID INTEGER PRIMARY KEY,
+    Username VARCHAR(20) UNIQUE,
+    Email VARCHAR(100) UNIQUE,
+    Password VARCHAR(15),
+    Name VARCHAR(100),
+    User_types VARCHAR(9)
+);
+
+CREATE TABLE Admins (
+    AdminID VARCHAR(20) PRIMARY KEY UNIQUE,
+    UserID INTEGER,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+);
+
+CREATE TABLE Vendors (
+    VendorID VARCHAR(20) PRIMARY KEY UNIQUE,
+    UserID INTEGER,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+);
+
+CREATE TABLE Customers (
+    CustomerID VARCHAR(20) PRIMARY KEY UNIQUE,
+    UserID INTEGER,
+    Address VARCHAR(100),
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+);
+
+CREATE TABLE Products (
+    ProductID VARCHAR(20) PRIMARY KEY UNIQUE,
+    VendorID VARCHAR(20),
+    Current_Price DECIMAL(10,2),
+    Title VARCHAR(20),
+    FOREIGN KEY (VendorID) REFERENCES Vendors(VendorID)
+);
+
+CREATE TABLE Products_description (
+    ProductID VARCHAR(20),
+    Warranty_period DATE,
+    Number_of_items INTEGER,
+    Inventory VARCHAR(20),
+    Images MEDIUMTEXT,
+    Available_sizes VARCHAR(20),
+    Available_colors VARCHAR(20),
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
+);
+
+CREATE TABLE Discount_info (
+    DiscountID VARCHAR(20) PRIMARY KEY UNIQUE,
+    CustomerID VARCHAR(20),
+    Date_started DATE,
+    Discount_amount DECIMAL(10,2),
+    Time_available DATE,
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
+);
+
+CREATE TABLE Cart (
+    ProductID VARCHAR(20),
+    Current_price DECIMAL(10,2),
+    Color VARCHAR(20),
+    Size VARCHAR(20),
+    CustomerID VARCHAR(20),
+    DiscountID VARCHAR(20),
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID),
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID),
+    FOREIGN KEY (DiscountID) REFERENCES Discount_info(DiscountID)
+);
+
+CREATE TABLE Complaints (
+    ComplaintID VARCHAR(20) PRIMARY KEY UNIQUE,
+    CustomerID VARCHAR(20),
+    AdminID VARCHAR(20),
+    Demand MEDIUMTEXT,
+    Status VARCHAR(20),
+    Date DATE,
+    Image MEDIUMTEXT,
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID),
+    FOREIGN KEY (AdminID) REFERENCES Admins(AdminID)
+);
+
+CREATE TABLE Orders (
+    OrderID VARCHAR(20) PRIMARY KEY UNIQUE,
+    Total_price DECIMAL(10,2),
+    CustomerID VARCHAR(20),
+    Status VARCHAR(20),
+    Date DATE,
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
+);
+
+CREATE TABLE OrderListOfItems (
+    OrderID VARCHAR(20),
+    ProductID VARCHAR(20),
+    Current_price DECIMAL(10,2),
+    Color VARCHAR(20),
+    Size VARCHAR(10),
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID),
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
+);
+
+CREATE TABLE Review (
+    ReviewID VARCHAR(20) PRIMARY KEY UNIQUE,
+    CustomerID VARCHAR(20),
+    Rating INTEGER,
+    Description MEDIUMTEXT,
+    Date DATE,
+    Image VARCHAR(255),
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
+);
