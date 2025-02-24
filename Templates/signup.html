@@ -1,0 +1,74 @@
+<style>
+.body {
+    width: 300px;
+    margin: 0 auto;
+}
+
+.msg {
+    color: red;
+    margin-bottom: 10px;
+}
+
+.textbox {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+}
+
+.bottom {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.bottom:hover {
+    text-decoration: underline;
+}
+
+</style>
+{% block body %}
+<div class="body">
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        {% if category == 'error' %}
+            <script>
+                window.onload = function() {
+                    alert('{{ message }}');
+                }
+            </script>
+        {% endif %}
+    {% endfor %}
+{% endwith %}
+
+
+<form action="{{ url_for('signup') }}" method="post">
+    <div class="msg">{{ msg }}</div>
+    <input id="username" name="username" type="text" placeholder="Enter your username" class="textbox" required/><br><br>
+    <input id="password" name="password" type="password" placeholder="Enter your password" class="textbox" required/><br><br>
+    <input id="email" name="email" type="email" placeholder="Enter your email address" class="textbox" required/><br><br>
+    <input id="first_name" name="first_name" type="text" placeholder="Enter your First Name" class="textbox" required/><br><br>
+    <input id="last_name" name="last_name" type="text" placeholder="Enter your Last Name" class="textbox" required/><br><br>
+    <input id="SSN" name="SSN" type="number" placeholder="Enter your Social Security Number" class="textbox" minlength="9" maxlength="9" required/><br><br>
+    <input id="phone_number" name="phone_number" type="number" placeholder="Enter your Phone Number" class="textbox" minlength="10" maxlength="10" required/><br><br>
+    <input id="address" name="address" type="text" placeholder="Enter your Address" class="textbox" required/><br><br>
+
+    <input type="submit" class="btn" value="Sign Up"><br>
+</form>
+        <p>Already have an account? <a href="/login"> Sign in here</a></p>
+    </div>
+{% endblock %}
