@@ -100,3 +100,11 @@ def signup():
             session["WaitingForApproval"] = True
             return redirect(url_for('waiting'))
         return render_template('signup.html', msg=msg)
+    
+
+@app.route('/home', methods=['GET', 'POST'])
+def homepage():
+    return render_template('Homepage.html')
+
+if __name__ == '__main__':
+    app.run(debug=True)
