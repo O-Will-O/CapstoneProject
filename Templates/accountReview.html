@@ -1,0 +1,66 @@
+<style>
+.body {
+    width: 300px;
+    margin: 0 auto;
+}
+
+.msg {
+    color: red;
+    margin-bottom: 10px;
+}
+
+.textbox {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+}
+
+.bottom {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.bottom:hover {
+    text-decoration: underline;
+}
+
+</style>
+{% extends "base.html" %}
+{% block body %}
+<h1>To be Reviewed</h1>
+{% for i in accounts %}
+    <ul>
+        <li>Username: {{ i[0] }}</li>
+        <ul>
+            <li>Email: {{ i[4] }}</li>
+            <li>Firstname: {{ i[1] }}</li>
+            <li>Lastname: {{ i[2] }}</li>
+            <li>Phone: {{ i[3] }}</li>
+            <li>Address: {{ i[5] }}</li>
+            <form action="/accountReview" method="post">
+                <input type="hidden" name="username" value="{{ i[0] }}">
+                <input type="submit" value="Reviewed">
+            </form>
+        </ul>
+    </ul>
+{% endfor %}
+
+
+
+{% endblock %}
