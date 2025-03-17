@@ -1,3 +1,6 @@
+Create dataBASE CapstoneProject;
+Use CapstoneProject;
+
 CREATE TABLE Users (
     UserID INTEGER PRIMARY KEY,
     Username VARCHAR(20) UNIQUE,
@@ -6,6 +9,17 @@ CREATE TABLE Users (
     Name VARCHAR(100),
     User_types VARCHAR(9)
 );
+
+CREATE TABLE UserApprovalLogs (
+    LogID INTEGER PRIMARY KEY AUTO_INCREMENT,
+    UserID INTEGER,
+    AdminID VARCHAR(20),
+    Action VARCHAR(20),  -- 'Approved' or 'Rejected'
+    ActionDate DATE,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    FOREIGN KEY (AdminID) REFERENCES Admins(AdminID)
+);
+
 
 CREATE TABLE Admins (
     AdminID VARCHAR(20) PRIMARY KEY UNIQUE,
@@ -46,8 +60,8 @@ CREATE TABLE Products_description (
 );
 
 CREATE TABLE Discount_info (
-    DiscountID VARCHAR(20) PRIMARY KEY UNIQUE,
     CustomerID VARCHAR(20),
+    DiscountID VARCHAR(20) PRIMARY KEY UNIQUE,
     Date_started DATE,
     Discount_amount DECIMAL(10,2),
     Time_available DATE,
@@ -106,3 +120,75 @@ CREATE TABLE Review (
     Image VARCHAR(255),
     FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
 );
+
+
+
+
+
+-- Insert into Users table
+INSERT INTO Users (UserID, Username, Email, Password, Name, User_types) VALUES
+(1, 'admin1', 'admin1@example.com', 'pass123', 'John Doe', 'Admin'),
+(2, 'vendor1', 'vendor1@example.com', 'vend123', 'Alice Smith', 'Vendor'),
+(3, 'customer1', 'customer1@example.com', 'cust123', 'Bob Johnson', 'Customer'),
+(4, 'customer2', 'customer2@example.com', 'cust456', 'Emily Davis', 'Customer');
+
+-- Insert into Admins table
+INSERT INTO Admins (AdminID, UserID) VALUES
+('A001', 1);
+
+-- Insert into Vendors table
+INSERT INTO Vendors (VendorID, UserID) VALUES
+('V001', 2);
+
+-- Insert into Customers table
+INSERT INTO Customers (CustomerID, UserID, Address) VALUES
+('C001', 3, '123 Main St, City A'),
+('C002', 4, '456 Elm St, City B');
+
+-- Insert into Products table
+INSERT INTO Products (ProductID, VendorID, Current_Price, Title) VALUES
+('P001', 'V001', 49.99, 'Wireless Mouse'),
+('P002', 'V001', 99.99, 'Mechanical Keyboard');
+
+-- Insert into Products_description table
+INSERT INTO Products_description (ProductID, Warranty_period, Number_of_items, Inventory, Images, Available_sizes, Available_colors) VALUES
+('P001', '2026-12-31', 100, 'Warehouse A', 'mouse.jpg', NULL, 'Black, White'),
+('P002', '2026-12-31', 50, 'Warehouse B', 'keyboard.jpg', NULL, 'Black, Red');
+
+-- Insert into Discount_info table
+INSERT INTO Discount_info (CustomerID, DiscountID, Date_started, Discount_amount, Time_available) VALUES
+('C001', 'D001', '2025-03-01', 10.00, '2025-03-31'),
+('C002', 'D002', '2025-03-05', 15.00, '2025-04-05');
+
+-- Insert into Cart table
+INSERT INTO Cart (ProductID, Current_price, Color, Size, CustomerID, DiscountID) VALUES
+('P001', 49.99, 'Black', NULL, 'C001', 'D001'),
+('P002', 99.99, 'Red', NULL, 'C002', 'D002');
+
+-- Insert into Complaints table
+INSERT INTO Complaints (ComplaintID, CustomerID, AdminID, Demand, Status, Date, Image) VALUES
+('COMP001', 'C001', 'A001', 'Defective product', 'Pending', '2025-03-10', 'complaint1.jpg'),
+('COMP002', 'C002', 'A001', 'Late delivery', 'Resolved', '2025-03-08', 'complaint2.jpg');
+
+-- Insert into Orders table
+INSERT INTO Orders (OrderID, Total_price, CustomerID, Status, Date) VALUES
+('O001', 89.99, 'C001', 'Shipped', '2025-03-12'),
+('O002', 120.00, 'C002', 'Delivered', '2025-03-13');
+
+-- Insert into OrderListOfItems table
+INSERT INTO OrderListOfItems (OrderID, ProductID, Current_price, Color, Size) VALUES
+('O001', 'P001', 49.99, 'Black', NULL),
+('O002', 'P002', 99.99, 'Red', NULL);
+
+-- Insert into Review table
+INSERT INTO Review (ReviewID, CustomerID, Rating, Description, Date, Image) VALUES
+('R001', 'C001', 5, 'Great product, works perfectly!', '2025-03-14', 'review1.jpg'),
+('R002', 'C002', 4, 'Good keyboard, but a bit noisy.', '2025-03-15', 'review2.jpg');
+
+-- Log user approval action
+INSERT INTO UserApprovalLogs (UserID, AdminID, Action, ActionDate)
+VALUES (3, 'A001', 'Approved', CURDATE());
+
+-- Log user rejection action
+INSERT INTO UserApprovalLogs (UserID, AdminID, Action, ActionDate)
+VALUES (4, 'A001', 'Rejected', CURDATE());
