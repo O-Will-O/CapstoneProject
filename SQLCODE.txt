@@ -10,17 +10,6 @@ CREATE TABLE Users (
     User_types VARCHAR(9)
 );
 
-CREATE TABLE UserApprovalLogs (
-    LogID INTEGER PRIMARY KEY AUTO_INCREMENT,
-    UserID INTEGER,
-    AdminID VARCHAR(20),
-    Action VARCHAR(20),  -- 'Approved' or 'Rejected'
-    ActionDate DATE,
-    FOREIGN KEY (UserID) REFERENCES Users(UserID),
-    FOREIGN KEY (AdminID) REFERENCES Admins(AdminID)
-);
-
-
 CREATE TABLE Admins (
     AdminID VARCHAR(20) PRIMARY KEY UNIQUE,
     UserID INTEGER,
@@ -121,7 +110,15 @@ CREATE TABLE Review (
     FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
 );
 
-
+CREATE TABLE UserApprovalLogs (
+    LogID INTEGER PRIMARY KEY AUTO_INCREMENT,
+    UserID INTEGER,
+    AdminID VARCHAR(20),
+    Action VARCHAR(20),  -- 'Approved' or 'Rejected'
+    ActionDate DATE,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    FOREIGN KEY (AdminID) REFERENCES Admins(AdminID)
+);
 
 
 
