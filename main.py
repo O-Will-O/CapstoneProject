@@ -24,6 +24,41 @@ def Checkexist(username):
     account = conn.execute(text("SELECT username FROM users WHERE username = :username"), {'username': username})
     return account.fetchone() is not None
 
+
+def checkinput(phone, ssn):
+    phone_pattern = r'^\d{10}$'
+    ssn_pattern = r'^\d{9}$'
+    yn = True
+    errorIn = []
+
+    if not re.match(phone_pattern, phone):
+        yn = False
+        errorIn.append("Phone")
+
+    if not re.match(ssn_pattern, ssn):
+        yn = False
+        errorIn.append("SSN")
+
+    return yn, errorIn
+
+def Checkexist(username):
+     username = str(username)
+     account = conn.execute(text("SELECT username FROM users WHERE username = :username"), {'username': username})
+     result = account.fetchone()
+     if result:
+         return True
+     else:
+        return False
+
+@app.route("/")
+def index():
+    if 'loggedin' in session and session['Username'] != "Admin":
+        return render_template("index.html")
+    elif 'loggedin' in session and session['Username'] == "Admin":
+        return redirect(url_for('admin_home'))
+    else:
+        return redirect(url_for('login'))
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     msg = ''
@@ -123,9 +158,6 @@ def accountReview():
 
     flash("Access Denied", "error")
     return redirect(url_for('login'))
-
-
-
 
 
 if __name__ == "__main__":
