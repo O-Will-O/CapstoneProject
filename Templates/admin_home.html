@@ -11,7 +11,8 @@
         <div class="">
           <ul class="barItem">
 
-            <li><a href="/">Home</a></li>
+            <li><a href="/admin_home">Home</a></li>
+            <li><a href="/accountReview">Account Review</a></li>
             <li><a href="/my_account">My Account</a></li>
             <li><a href="/add_money">Deposit</a></li>
             <li><a href="/send_money">Transfer</a></li>
@@ -24,7 +25,19 @@
 
         </div>
 
-      </div>
     </header>
-    {% block body %}
-    {% endblock %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        {% if category == 'info' %}
+            <script>
+                window.onload = function() {
+                    alert('{{ message }}');
+                }
+            </script>
+        {% endif %}
+    {% endfor %}
+{% endwith %}
+
+{% block body %}
+<h1>Hello, {{ session["Username"] }}</h1>
+{% endblock %}
