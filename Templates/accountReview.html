@@ -1,66 +1,102 @@
-<style>
-.body {
-    width: 300px;
-    margin: 0 auto;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../static/style.css">
+    <title>Account Review</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .approve-btn {
+            background-color: green;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+        }
+        .deny-btn {
+            background-color: red;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="topBar">
+            <ul class="barItem">
+                <li><a href="/admin_home">Home</a></li>
+                <li><a href="/accountReview">Account Review</a></li>
+                <li><a href="/logout" class="btn">Logout</a></li>
+            </ul>
+        </div>
+    </header>
 
-.msg {
-    color: red;
-    margin-bottom: 10px;
-}
+    <h1>Pending Account Approvals</h1>
 
-.textbox {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            {% if category == 'info' %}
+                <script>
+                    window.onload = function() {
+                        alert('{{ message }}');
+                    }
+                </script>
+            {% endif %}
+        {% endfor %}
+    {% endwith %}
 
-.btn {
-    width: 100%;
-    padding: 10px;
-    border: none;
-    background-color: #007bff;
-    color: #fff;
-    border-radius: 5px;
-    cursor: pointer;
-}
+    <table>
+        <tr>
+            <th>Username</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Phone Number</th>
+            <th>Email</th>
+            <th>Address</th>
+            <th>Actions</th>
+        </tr>
+        {% for account in accounts %}
+        <tr>
+            <td>{{ account.username }}</td>
+            <td>{{ account.first_name }}</td>
+            <td>{{ account.last_name }}</td>
+            <td>{{ account.phone_number }}</td>
+            <td>{{ account.email }}</td>
+            <td>{{ account.address }}</td>
+            <td class="action-buttons">
+                <!-- Approve Form -->
+                <form action="/approve_account" method="POST">
+                    <input type="hidden" name="username" value="{{ account.username }}">
+                    <button type="submit" class="approve-btn">Approve</button>
+                </form>
 
-.btn:hover {
-    background-color: #0056b3;
-}
+                <!-- Deny Form -->
+                <form action="/deny_account" method="POST">
+                    <input type="hidden" name="username" value="{{ account.username }}">
+                    <button type="submit" class="deny-btn">Deny</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
 
-.bottom {
-    color: #007bff;
-    text-decoration: none;
-}
-
-.bottom:hover {
-    text-decoration: underline;
-}
-
-</style>
-{% extends "base.html" %}
-{% block body %}
-<h1>To be Reviewed</h1>
-{% for i in accounts %}
-    <ul>
-        <li>Username: {{ i[0] }}</li>
-        <ul>
-            <li>Email: {{ i[4] }}</li>
-            <li>Firstname: {{ i[1] }}</li>
-            <li>Lastname: {{ i[2] }}</li>
-            <li>Phone: {{ i[3] }}</li>
-            <li>Address: {{ i[5] }}</li>
-            <form action="/accountReview" method="post">
-                <input type="hidden" name="username" value="{{ i[0] }}">
-                <input type="submit" value="Reviewed">
-            </form>
-        </ul>
-    </ul>
-{% endfor %}
-
-
-
-{% endblock %}
+</body>
+</html>
