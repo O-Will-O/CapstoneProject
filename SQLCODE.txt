@@ -7,7 +7,8 @@ CREATE TABLE Users (
     Email VARCHAR(100) UNIQUE,
     Password VARCHAR(15),
     Name VARCHAR(100),
-    User_types VARCHAR(9)
+    User_types VARCHAR(9),
+    Approval_Status VARCHAR(20)  -- 'Approved' or 'Rejected'
 );
 
 CREATE TABLE Admins (
