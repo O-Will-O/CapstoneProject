@@ -6,7 +6,7 @@ app = Flask(__name__)
 app.secret_key = 'secret_key'
 
 # Database connection string
-conn_str = "mysql://root:cyber241@localhost/CapstoneProject"
+conn_str = "mysql://root:Ilikegames05!@localhost/CapstoneProject"
 engine = create_engine(conn_str, echo=True)
 conn = engine.connect()
 
@@ -158,6 +158,8 @@ def accountReview():
 
     flash("Access Denied", "error")
     return redirect(url_for('login'))
+
+
 
 
 if __name__ == "__main__":
