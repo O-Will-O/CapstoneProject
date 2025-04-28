@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discount Game</title>
+    <link rel="stylesheet" href="../static/blockrain.css">
+    <style>
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .game-controls button {
+            padding: 8px 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .game-controls button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="game" style="width:250px; height:500px; margin: 0 auto;"></div>
+    <div class="game-controls">
+        <button id="pauseBtn">Pause</button>
+        <button id="resumeBtn">Resume</button>
+    </div>
+
+    <form action="/game" method="post">
+        <input class="score" id="score" name="score" type="text">
+        <button type="submit">Submit</button>
+    </form>
+
+    <!-- Load jQuery from CDN with fallback -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>window.jQuery || document.write('<script src="../static/blockrain.jquery.js"><\/script>')</script>
+    
+    <!-- Load BlockRain plugin -->
+    <script src="../static/blockrain.jquery.js"></script>
+    
+    <!-- Initialize game with controls -->
+    <script>
+        $(document).ready(function() {
+            try {
+                var $game = $('.game').blockrain({
+                    autoplay: false,
+                    speed: 20,
+                    theme: 'candy'
+                });
+
+                $('#pauseBtn').click(function() {
+                    $game.blockrain('pause');
+                });
+
+                $('#resumeBtn').click(function() {
+                    $game.blockrain('resume');
+                });
+
+            } catch(e) {
+                console.error('Error initializing game:', e);
+                $('.game').html('<p>Error loading game. Please try again.</p>');
+            }
+            
+
+
+            const checker = setInterval(() => {
+        const targetElement = document.getElementsByClassName("blockrain-game-over-holder");
+        const displayStyle = targetElement[0].style.display;
+        const target = document.querySelector('.blockrain-game-over');
+          if (target && !displayStyle) {
+            var score = $game.blockrain('score');
+            alert(score);
+            postScore(score);
+            clearInterval(checker);
+          }
+        }, 500);
+
+
+        },
+    );
+
+function postScore(score) {
+    $.post('/game', { score: score }, function(response) {
+        console.log('Score posted successfully:', response);
+    }).fail(function() {
+        console.error('Error posting score');
+    });
+}
+    </script>
+</body>
+</html>

@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from sqlalchemy import create_engine, text
 import re
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'
@@ -159,6 +160,53 @@ def accountReview():
     flash("Access Denied", "error")
     return redirect(url_for('login'))
 
+@app.route('/game', methods=['GET', 'POST'])
+def gamePage():
+    if request.method == 'GET':
+        return render_template("discount_game_page.html")
+    
+    if request.method == 'POST':
+        session['CustomerID'] = "C001"
+        if 'CustomerID' not in session:
+            return jsonify({'status': 'error', 'message': 'Customer not logged in'}), 401
+            
+        customer_id = session['CustomerID']
+        score = int(request.form.get('score', 0))
+        
+        # Calculate discount amount ((score/1000)/2)%
+        discount_amount = (score / 100000) / 2
+        
+        # Get current date and 6 months later
+        date_started = datetime.now()
+        time_available = date_started + timedelta(days=180)
+        
+        discount_id = 1
+        # Insert into database
+        try:
+            with engine.begin() as conn:
+                conn.execute(text("""
+                    INSERT INTO Discount_info 
+                    (CustomerID, DiscountID, Discount_amount, Date_started, Time_available) 
+                    VALUES (:customer_id, :discount_id, :discount_amount, :date_started, :time_available)
+                """), {
+                    'customer_id': customer_id,
+                    'discount_id' : discount_id,
+                    'discount_amount': discount_amount,
+                    'date_started': date_started,
+                    'time_available': time_available
+                })
+                
+            return jsonify({
+                'status': 'success',
+                'discount_amount': f"{discount_amount}%",
+                'valid_until': time_available.strftime('%Y-%m-%d')
+            })
+            
+        except Exception as e:
+            return jsonify({
+                'status': 'error',
+                'message': str(e)
+            }), 500
 
 
 if __name__ == "__main__":
