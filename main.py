@@ -15,6 +15,59 @@ conn = engine.connect()
 ADMIN_USERNAME = "Admin"
 ADMIN_PASSWORD = "AdminPass123"
 
+
+
+from sqlalchemy import text
+
+# Prefix-to-table/column map
+ID_MAP = {
+    'U': ('Users', 'UserID'),
+    'C': ('Customers', 'CustomerID'),
+    'P': ('Products', 'ProductID'),
+    'D': ('Discount_info', 'DiscountID'),
+    'COMP': ('Complaints', 'ComplaintID'),
+    'O': ('Orders', 'OrderID')
+}
+
+def get_next_custom_id(prefix, conn):
+    if prefix not in ID_MAP:
+        raise ValueError(f"Unknown prefix '{prefix}'")
+
+    table, column = ID_MAP[prefix]
+
+    if prefix == 'U':
+        # Integer auto-increment; return next integer
+        result = conn.execute(text(f"SELECT MAX({column}) as max_id FROM {table}")).fetchone()
+        return (result.max_id or 0) + 1
+
+    elif prefix == 'COMP':
+        query = text(f"""
+            SELECT {column} FROM {table}
+            WHERE {column} LIKE :prefix
+            ORDER BY {column} DESC LIMIT 1
+        """)
+        result = conn.execute(query, {'prefix': f'{prefix}%'}).fetchone()
+        if result:
+            num = int(result[column].replace(prefix, '')) + 1
+        else:
+            num = 1
+        return f"{prefix}{str(num).zfill(3)}"
+
+    else:
+        query = text(f"""
+            SELECT {column} FROM {table}
+            WHERE {column} LIKE :prefix
+            ORDER BY {column} DESC LIMIT 1
+        """)
+        result = conn.execute(query, {'prefix': f'{prefix}%'})
+        row = result.fetchone()
+        if row:
+            num = int(row[column][len(prefix):]) + 1
+        else:
+            num = 1
+        return f"{prefix}{str(num).zfill(3)}"
+
+
 def checkinput(phone):
     phone_pattern = r'^\d{10}$'
     yn = bool(re.match(phone_pattern, phone))
@@ -24,7 +77,6 @@ def checkinput(phone):
 def Checkexist(username):
     account = conn.execute(text("SELECT username FROM users WHERE username = :username"), {'username': username})
     return account.fetchone() is not None
-
 
 def checkinput(phone, ssn):
     phone_pattern = r'^\d{10}$'
@@ -180,33 +232,23 @@ def gamePage():
         date_started = datetime.now()
         time_available = date_started + timedelta(days=180)
         
-        discount_id = 1
-        # Insert into database
-        try:
-            with engine.begin() as conn:
-                conn.execute(text("""
-                    INSERT INTO Discount_info 
-                    (CustomerID, DiscountID, Discount_amount, Date_started, Time_available) 
-                    VALUES (:customer_id, :discount_id, :discount_amount, :date_started, :time_available)
-                """), {
-                    'customer_id': customer_id,
-                    'discount_id' : discount_id,
-                    'discount_amount': discount_amount,
-                    'date_started': date_started,
-                    'time_available': time_available
-                })
-                
-            return jsonify({
-                'status': 'success',
-                'discount_amount': f"{discount_amount}%",
-                'valid_until': time_available.strftime('%Y-%m-%d')
-            })
-            
-        except Exception as e:
-            return jsonify({
-                'status': 'error',
-                'message': str(e)
-            }), 500
+        discount_id = get_next_custom_id("D", conn)
+        print("TESTING THE NEW FUNCTION", discount_id)
+
+        print("THIS IS FOR TESTING PORPOSES", discount_id, discount_amount, date_started, time_available)
+        # engine.begin()
+        # conn.execute(text("""
+        #             INSERT INTO Discount_info 
+        #             (CustomerID, DiscountID, Discount_amount, Date_started, Time_available) 
+        #             VALUES (:customer_id, :discount_id, :discount_amount, :date_started, :time_available)
+        #         """), {
+        #             'customer_id': customer_id,
+        #             'discount_id' : discount_id,
+        #             'discount_amount': discount_amount,
+        #             'date_started': date_started,
+        #             'time_available': time_available
+        #         })
+        return redirect(url_for('index'))
 
 
 if __name__ == "__main__":
