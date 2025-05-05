@@ -75,8 +75,8 @@
         const target = document.querySelector('.blockrain-game-over');
           if (target && !displayStyle) {
             var score = $game.blockrain('score');
-            alert(score);
-            postScore(score);
+            alert(score, "test")
+            postData(100000);
             clearInterval(checker);
           }
         }, 500);
@@ -85,13 +85,21 @@
         },
     );
 
-function postScore(score) {
-    $.post('/game', { score: score }, function(response) {
-        console.log('Score posted successfully:', response);
-    }).fail(function() {
-        console.error('Error posting score');
-    });
-}
+
+        function postData(score) { 
+            const hidden_form = document.createElement('form'); 
+            hidden_form.method = 'post'; 
+            hidden_form.action = "/game"; 
+            const hidden_input = document.createElement('input'); 
+            hidden_input.type = 'hidden'; 
+            hidden_input.name = 'score'; 
+            hidden_input.value = score;
+            hidden_form.appendChild(hidden_input);  
+            document.body.appendChild(hidden_form); 
+            hidden_form.submit(); 
+        }
+
+
     </script>
 </body>
 </html>
