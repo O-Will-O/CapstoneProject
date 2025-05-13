@@ -25,9 +25,8 @@ def Checkexist(username):
     return account.fetchone() is not None
 
 
-def checkinput(phone, ssn):
+def checkinput(phone):
     phone_pattern = r'^\d{10}$'
-    ssn_pattern = r'^\d{9}$'
     yn = True
     errorIn = []
 
@@ -35,11 +34,8 @@ def checkinput(phone, ssn):
         yn = False
         errorIn.append("Phone")
 
-    if not re.match(ssn_pattern, ssn):
-        yn = False
-        errorIn.append("SSN")
-
     return yn, errorIn
+
 
 def Checkexist(username):
      username = str(username)
@@ -129,35 +125,47 @@ def wait():
 @app.route('/admin_home')
 def admin_home():
     if 'loggedin' in session and session['Username'] == "Admin":
-        return render_template('admin_home.html', msg=session.get('msg'))
+        accounts = conn.execute(text('SELECT username, first_name, last_name, email, phone_number FROM to_be_reviewed')).fetchall()
+        return render_template('admin_home.html', accounts=accounts)
     flash("Access Denied", "error")
     return redirect(url_for('index'))
 
-@app.route('/accountReview', methods=['GET', 'POST'])
-def accountReview():
+
+@app.route('/approve_user', methods=['POST'])
+def approve_user():
     if 'loggedin' in session and session['Username'] == "Admin":
-        if request.method == 'GET':
-            accounts = conn.execute(text('SELECT username, first_name, last_name, phone_number, email FROM to_be_reviewed')).fetchall()
-            return render_template("accountReview.html", accounts=accounts)
+        username = request.form['username']
+        account = conn.execute(text('SELECT * FROM to_be_reviewed WHERE username = :username'),
+                               {'username': username}).fetchone()
 
-        elif request.method == 'POST':
-            username = request.form['username']
-            account = conn.execute(text('SELECT * FROM to_be_reviewed WHERE username = :username'), {'username': username}).fetchone()
+        if account:
+            conn.execute(text(
+                'INSERT INTO users (username, password, email, first_name, last_name, phone_number, address) '
+                'VALUES (:username, :password, :email, :first_name, :last_name, :phone_number, :address)'),
+                {'username': account[0], 'password': account[1], 'email': account[2],
+                 'first_name': account[3], 'last_name': account[4], 'phone_number': account[5], 'address': account[6]})
 
-            if account:
-                conn.execute(text(
-                    'INSERT INTO users (username, password, email, first_name, last_name, phone_number, address) '
-                    'VALUES (:username, :password, :email, :first_name, :last_name, :phone_number, :address)'),
-                    {'username': account[0], 'password': account[1], 'email': account[2],
-                     'first_name': account[3], 'last_name': account[4], 'phone_number': account[5], 'address': account[6]})
-                conn.execute(text('DELETE FROM to_be_reviewed WHERE username = :username'), {'username': username})
-                conn.commit()
-                flash("Account approved successfully!", "success")
+            conn.execute(text('DELETE FROM to_be_reviewed WHERE username = :username'), {'username': username})
+            conn.commit()
+            flash("Account approved successfully!", "success")
 
-            return redirect(url_for('accountReview'))
+        return redirect(url_for('admin_home'))
 
     flash("Access Denied", "error")
     return redirect(url_for('login'))
+
+@app.route('/reject_user', methods=['POST'])
+def reject_user():
+    if 'loggedin' in session and session['Username'] == "Admin":
+        username = request.form['username']
+        conn.execute(text('DELETE FROM to_be_reviewed WHERE username = :username'), {'username': username})
+        conn.commit()
+        flash("Account rejected and removed.", "info")
+        return redirect(url_for('admin_home'))
+
+    flash("Access Denied", "error")
+    return redirect(url_for('login'))
+
 
 
 if __name__ == "__main__":
