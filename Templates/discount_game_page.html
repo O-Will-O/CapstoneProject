@@ -5,38 +5,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Discount Game</title>
     <link rel="stylesheet" href="../static/blockrain.css">
+    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans&display=swap" rel="stylesheet">
     <style>
-        .game-controls {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .game-controls button {
-            padding: 8px 16px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .game-controls button:hover {
-            background: #45a049;
-        }
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .tetris-container {
+      background-color: #111;
+      font-family: 'Pixelify Sans', sans-serif;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+      width: 320px;
+      height: 640px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .tetris-header {
+      color: #00ffcc;
+      font-family: 'Pixelify Sans', sans-serif;
+      font-size: 24px;
+      text-align: center;
+      padding-bottom: 10px;
+    }
+
+    canvas {
+      background-color: #222;
+      border: 2px solid #00ffcc;
+      border-radius: 8px;
+      width: 100%;
+      height: auto;
+      flex-grow: 1;
+    }
+
+    .tetris-controls {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .tetris-controls button {
+      background: #00ffcc;
+      letter-spacing: 2px;
+      text-decoration: underline;
+      font-family: 'Pixelify Sans', sans-serif;
+      border: none;
+      font-size: 16px;
+      padding: 10px 16px;
+      border-radius: 6px;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .tetris-controls button:hover {
+      background: #00ccaa;
+    }
     </style>
 </head>
 <body>
-    <div class="game" style="width:250px; height:500px; margin: 0 auto;"></div>
-    <div class="game-controls">
-        <button id="pauseBtn">Pause</button>
-        <button id="resumeBtn">Resume</button>
-    </div>
-
-    <form action="/game" method="post">
-        <input class="score" id="score" name="score" type="text">
-        <button type="submit">Submit</button>
-    </form>
-
+<div class="tetris-container">
+    <div class="tetris-header">Legally Distinct Tatrus</div>
+        <div class="game" style="width:250px; height:500px; margin: 0 auto;"></div>
+        <div class="game-controls tetris-controls">
+            <button id="pauseBtn">Pause</button>
+            <button id="resumeBtn">Resume</button>
+        </div>
+</div>
     <!-- Load jQuery from CDN with fallback -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>window.jQuery || document.write('<script src="../static/blockrain.jquery.js"><\/script>')</script>
