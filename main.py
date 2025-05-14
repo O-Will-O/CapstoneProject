@@ -1,18 +1,72 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from sqlalchemy import create_engine, text
 import re
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'
 
 # Database connection string
-conn_str = "mysql://root:cyber241@localhost/CapstoneProject"
+conn_str = "mysql://root:Ilikegames05!@localhost/CapstoneProject"
 engine = create_engine(conn_str, echo=True)
 conn = engine.connect()
 
 # Admin credentials
 ADMIN_USERNAME = "Admin"
 ADMIN_PASSWORD = "AdminPass123"
+
+
+
+from sqlalchemy import text
+
+# Prefix-to-table/column map
+ID_MAP = {
+    'U': ('Users', 'UserID'),
+    'C': ('Customers', 'CustomerID'),
+    'P': ('Products', 'ProductID'),
+    'D': ('Discount_info', 'DiscountID'),
+    'COMP': ('Complaints', 'ComplaintID'),
+    'O': ('Orders', 'OrderID')
+}
+
+def get_next_custom_id(prefix, conn):
+    if prefix not in ID_MAP:
+        raise ValueError(f"Unknown prefix '{prefix}'")
+
+    table, column = ID_MAP[prefix]
+
+    if prefix == 'U':
+        # Integer auto-increment; return next integer
+        result = conn.execute(text(f"SELECT MAX({column}) as max_id FROM {table}")).fetchone()
+        return (result.max_id or 0) + 1
+
+    elif prefix == 'COMP':
+        query = text(f"""
+            SELECT {column} FROM {table}
+            WHERE {column} LIKE :prefix
+            ORDER BY {column} DESC LIMIT 1
+        """)
+        result = conn.execute(query, {'prefix': f'{prefix}%'}).fetchone()
+        if result:
+            num = int(result[0].replace(prefix, '')) + 1
+        else:
+            num = 1
+        return f"{prefix}{str(num).zfill(3)}"
+
+    else:
+        query = text(f"""
+            SELECT {column} FROM {table}
+            WHERE {column} LIKE :prefix
+            ORDER BY {column} DESC LIMIT 1
+        """)
+        result = conn.execute(query, {'prefix': f'{prefix}%'})
+        row = result.fetchone()
+        if row:
+            num = int(row[0][len(prefix):]) + 1
+        else:
+            num = 1
+        return f"{prefix}{str(num).zfill(3)}"
+
 
 def checkinput(phone):
     phone_pattern = r'^\d{10}$'
@@ -26,6 +80,7 @@ def Checkexist(username):
 
 
 def checkinput(phone):
+
     phone_pattern = r'^\d{10}$'
     yn = True
     errorIn = []
@@ -154,6 +209,7 @@ def approve_user():
     flash("Access Denied", "error")
     return redirect(url_for('login'))
 
+
 @app.route('/reject_user', methods=['POST'])
 def reject_user():
     if 'loggedin' in session and session['Username'] == "Admin":
@@ -165,6 +221,45 @@ def reject_user():
 
     flash("Access Denied", "error")
     return redirect(url_for('login'))
+
+
+@app.route('/game', methods=['GET', 'POST'])
+def gamePage():
+    if request.method == 'GET':
+        return render_template("discount_game_page.html")
+    
+    if request.method == 'POST':
+        session['CustomerID'] = "C001" #REMOVE AFTER GETTING ALL LOGIN STUFF CORRECT
+        if 'CustomerID' not in session:
+            return jsonify({'status': 'error', 'message': 'Customer not logged in'}), 401
+            
+        customer_id = session['CustomerID']
+        score = int(request.form.get('score', 0))
+        
+        # Calculate discount amount ((score/1000)/2)%
+        discount_amount = (score / 100000) / 2
+        
+        # Get current date and 6 months later
+        date_started = datetime.now()
+        time_available = date_started + timedelta(days=180)
+        
+        discount_id = get_next_custom_id("D", conn)
+        print("TESTING THE NEW FUNCTION", discount_id)
+
+        print("THIS IS FOR TESTING PORPOSES", discount_id, discount_amount, date_started, time_available)
+        conn.execute(text("""
+                    INSERT INTO Discount_info 
+                    (CustomerID, DiscountID, Discount_amount, Date_started, Time_available) 
+                    VALUES (:customer_id, :discount_id, :discount_amount, :date_started, :time_available)
+                """), {
+                    'customer_id': customer_id,
+                    'discount_id' : discount_id,
+                    'discount_amount': discount_amount,
+                    'date_started': date_started,
+                    'time_available': time_available
+                })
+        conn.commit()
+        return redirect(url_for('index'))
 
 
 
