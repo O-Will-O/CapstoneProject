@@ -29,7 +29,7 @@
       asdwKeys: true, // Enable ASDW keys
 
       // Copy
-      playText: 'Let\'s play some Tetris',
+      playText: 'Let\'s play some Tatrus',
       playButtonText: 'Play',
       gameOverText: 'Game Over',
       restartButtonText: 'Play Again',
